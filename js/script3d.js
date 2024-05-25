@@ -134,7 +134,7 @@ actMicrofono.addEventListener("click", function () {
 
             //aca
 
-            let cadena = [
+            const cadena = [
                 [0.18995, 0.07176, 0.23217],
                 [0.19483, 0.08339, 0.26149],
                 [0.19956, 0.09498, 0.29024],

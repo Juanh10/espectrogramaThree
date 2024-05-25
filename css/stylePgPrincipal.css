@@ -34,3 +34,14 @@ main {
 .botones a:hover {
   background-color: #45a049;
 }
+
+/* Media queries para mobile */
+@media only screen and (max-width: 768px) {
+  .tituloPrincipal{
+    font-size: 1.5rem;
+  }
+
+  .botones a{
+    padding: 1rem 1rem;
+  }  
+}
