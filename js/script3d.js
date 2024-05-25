@@ -2,104 +2,137 @@
 
 import * as THREE from "https://threejsfundamentals.org/threejs/resources/threejs/r122/build/three.module.js";
 
-let primerClick = true;
+const actMicrofono = document.getElementById("actMicro");
+const mutedMicro = document.getElementById("mutedMicro");
+let fuente, volumenGanancia;
+let camara, escena, alturas, renderizador;
+let ACTX;
+let malla, geometria; // Variables para la malla y la geometría
 
-let actMicrofono = document.getElementById("actMicro");
+const frecuenciaMuestra = 512;
+const tiempoMuestra = 1200;
+const n_vertices = (frecuenciaMuestra + 1) * (tiempoMuestra + 1);
 
-let mutedMicro = document.getElementById("mutedMicro");
+function inicializarEscena() {
+    camara = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 1000);
+    camara.position.z = 64;
 
-mutedMicro.addEventListener("click", function(){
+    escena = new THREE.Scene();
+    alturas = new Uint8Array(n_vertices);
 
-    alert("HOLA MUNDO")
+    renderizador = new THREE.WebGLRenderer({ antialias: true });
+    renderizador.setPixelRatio(window.devicePixelRatio);
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+    let contenedor = document.getElementById("Spectrogram");
+    contenedor.appendChild(renderizador.domElement);
 
+    return alturas;
+}
+
+function actualizarAlturas(nuevasAlturas) {
+    alturas.set(nuevasAlturas);
+    renderizador.render(escena, camara);
+}
+
+alturas = inicializarEscena();
+
+mutedMicro.addEventListener("click", () => {
+    if (fuente && volumenGanancia) {
+        volumenGanancia.gain.value = 0.0;
+        mutedMicro.style.display = "none";
+        actMicrofono.style.display = "block";
+    }
 });
 
 actMicrofono.addEventListener("click", function () {
     actMicrofono.style.display = "none";
     mutedMicro.style.display = "block";
-    if (primerClick) {
-        primerClick = false;
-        let frecuenciaMuestra = 512;
-        let ACTX = new AudioContext();
-        let ANALIZADOR = ACTX.createAnalyser();
-        ANALIZADOR.fftSize = 4 * frecuenciaMuestra;
-        ANALIZADOR.smoothingTimeConstant = 0.5;
-        let DATOS = new Uint8Array(ANALIZADOR.frequencyBinCount);
-        let FUENTE;
 
-        navigator.mediaDevices
-            .getUserMedia({ audio: { echoCancellation: false } })
-            .then(procesarAudio);
+    if (fuente) {
+        fuente.disconnect();
+        fuente = null;
+    }
+    if (volumenGanancia) {
+        volumenGanancia.disconnect();
+        volumenGanancia = null;
+    }
+    if (ACTX) {
+        ACTX.close();
+        ACTX = null;
+    }
 
-        function procesarAudio(stream) {
-            FUENTE = ACTX.createMediaStreamSource(stream);
-            FUENTE.connect(ANALIZADOR);
-        }
+    ACTX = new AudioContext();
+    const ANALIZADOR = ACTX.createAnalyser();
+    ANALIZADOR.fftSize = 4 * frecuenciaMuestra;
+    ANALIZADOR.smoothingTimeConstant = 0.5;
+    const DATOS = new Uint8Array(ANALIZADOR.frequencyBinCount);
+    let FUENTE;
 
-        let requestId;
-        let camara, escena, renderizador;
-        let alturas, malla;
-        let tiempoMuestra = 1200;
-        let n_vertices = (frecuenciaMuestra + 1) * (tiempoMuestra + 1);
+    navigator.mediaDevices
+        .getUserMedia({ audio: { echoCancellation: false } })
+        .then(procesarAudio);
 
-        init();
+    function procesarAudio(stream) {
+        FUENTE = ACTX.createMediaStreamSource(stream);
+        fuente = FUENTE;
+
+        volumenGanancia = ACTX.createGain();
+        volumenGanancia.gain.value = 1.0;
+
+        FUENTE.connect(volumenGanancia);
+        volumenGanancia.connect(ANALIZADOR);
+
+        let lut;
 
         function init() {
-            camara = new THREE.PerspectiveCamera(
-                27,
-                window.innerWidth / window.innerHeight,
-                1,
-                1000
-            );
-            camara.position.z = 64;
+            // Eliminar la malla y la geometría existentes si ya han sido creadas
+            if (malla) {
+                escena.remove(malla);
+                malla.geometry.dispose();
+                malla.material.dispose();
+                malla = null;
+                geometria = null;
+            }
 
-            escena = new THREE.Scene();
-            let geometria = new THREE.BufferGeometry();
+            // Crear la geometría
+            geometria = new THREE.BufferGeometry();
 
-            let indices = [];
-            alturas = [];
-            let vertices = [];
-            // number of time samples
-            let xTamano = 60;
+            const indices = [];
+            const vertices = [];
+            const xTamano = 60;
+            const yTamano = 20;
+            const xSegmentos = tiempoMuestra;
+            const ySegmentos = frecuenciaMuestra;
+            const xMTamano = xTamano / 2;
+            const yMTamano = yTamano / 2;
+            const xTaSegmento = xTamano / xSegmentos;
+            const yTaSegmento = yTamano / ySegmentos;
 
-            let yTamano = 20;
+            const ypow_max = Math.log(yTamano);
+            const ybase = Math.E;
 
-            let xSegmentos = tiempoMuestra;
-            let ySegmentos = frecuenciaMuestra;
-            let xMTamano = xTamano / 2;
-            let yMTamano = yTamano / 2;
-            let xTaSegmento = xTamano / xSegmentos;
-            let yTaSegmento = yTamano / ySegmentos;
-
-            // generate vertices and color data for a simple grid geometry
-
-            let ypow_max = Math.log(yTamano);
-            let ybase = Math.E;
-            // generate vertices and color data for a simple grid geometry
             for (let i = 0; i <= xSegmentos; i++) {
                 let x = i * xTaSegmento - xMTamano;
                 for (let j = 0; j <= ySegmentos; j++) {
-                    let potencia = ((ySegmentos - j) / ySegmentos) * ypow_max;
-                    let y = -Math.pow(ybase, potencia) + yMTamano + 1;
+                    const potencia = ((ySegmentos - j) / ySegmentos) * ypow_max;
+                    const y = -Math.pow(ybase, potencia) + yMTamano + 1;
                     vertices.push(x, y, 0);
-                    alturas.push(0);
                 }
             }
-
-            // generate indices (data for element array buffer)
 
             for (let i = 0; i < xSegmentos; i++) {
                 for (let j = 0; j < ySegmentos; j++) {
-                    let a = i * (ySegmentos + 1) + (j + 1);
-                    let b = i * (ySegmentos + 1) + j;
-                    let c = (i + 1) * (ySegmentos + 1) + j;
-                    let d = (i + 1) * (ySegmentos + 1) + (j + 1);
+                    const a = i * (ySegmentos + 1) + (j + 1);
+                    const b = i * (ySegmentos + 1) + j;
+                    const c = (i + 1) * (ySegmentos + 1) + j;
+                    const d = (i + 1) * (ySegmentos + 1) + (j + 1);
 
-                    // generate two faces (triangles) per iteration
-                    indices.push(a, b, d); // face one
-                    indices.push(b, c, d); // face two
+                    indices.push(a, b, d);
+                    indices.push(b, c, d);
                 }
             }
+
+            //aca
 
             let cadena = [
                 [0.18995, 0.07176, 0.23217],
@@ -360,7 +393,7 @@ actMicrofono.addEventListener("click", function () {
                 [0.4796, 0.01583, 0.01055],
             ];
 
-            var lut = [];
+            lut = [];
             for (let n = 0; n < 256; n++) {
                 lut.push(
                     new THREE.Vector3(
@@ -370,8 +403,6 @@ actMicrofono.addEventListener("click", function () {
                     )
                 );
             }
-
-            alturas = new Uint8Array(alturas);
 
             geometria.setIndex(indices);
             geometria.setAttribute(
@@ -383,6 +414,7 @@ actMicrofono.addEventListener("click", function () {
                 new THREE.Uint8BufferAttribute(alturas, 1)
             );
 
+            // Crear el material
             var vShader = document.getElementById("vertexshader");
             var fShader = document.getElementById("fragmentshader");
             var uniforms = {
@@ -395,42 +427,50 @@ actMicrofono.addEventListener("click", function () {
                 fragmentShader: fShader.text,
             });
 
+            // Crear la malla y agregarla a la escena
             malla = new THREE.Mesh(geometria, material);
             escena.add(malla);
-
-            renderizador = new THREE.WebGLRenderer({ antialias: true });
-            renderizador.setPixelRatio(window.devicePixelRatio);
-            renderizador.setSize(window.innerWidth, window.innerHeight);
-            let contenedor = document.getElementById("Spectrogram");
-            contenedor.appendChild(renderizador.domElement);
 
             malla.geometry.computeFaceNormals();
             malla.geometry.computeVertexNormals();
 
-            animacion();
-        }
+            crearTextoFrequencia();
 
-        function animacion() {
-            requestId = requestAnimationFrame(animacion);
-            render();
-        }
+            function render() {
+                actualizar_geometria();
+                renderizador.render(escena, camara);
+            }
+            renderizador.setAnimationLoop(render);
 
-        function render() {
-            actualizar_geometria();
-            renderizador.render(escena, camara);
         }
 
         function actualizar_geometria() {
             ANALIZADOR.getByteFrequencyData(DATOS);
-            let valorInicio = frecuenciaMuestra + 1;
-            let valorFinal = n_vertices - valorInicio;
+            const valorInicio = frecuenciaMuestra + 1;
+            const valorFinal = n_vertices - valorInicio;
             alturas.copyWithin(0, valorInicio, n_vertices + 1);
 
             alturas.set(DATOS, valorFinal - valorInicio);
-            malla.geometry.setAttribute(
-                "displacement",
-                new THREE.Uint8BufferAttribute(alturas, 1)
-            );
+            malla.geometry.attributes.displacement.array.set(alturas);
+            malla.geometry.attributes.displacement.needsUpdate = true;
         }
+
+        init();
+    }
+    function crearTextoFrequencia() {
+        const fontCarga = new THREE.FontLoader().load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+            const geometria = new THREE.TextGeometry('0 Hz\n\n\n\n\n512 Hz', {
+                font: font,
+                size: 10,
+                height: 1,
+                curveSegments: 12,
+            });
+
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const texto = new THREE.Mesh(geometria, material);
+            texto.position.set(50, 0, -50);
+            escena.add(texto);
+            
+        });
     }
 });
