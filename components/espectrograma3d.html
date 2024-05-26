@@ -7,14 +7,27 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
-    <link rel="stylesheet" href="../css/styleEspectrograma3d.css">
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styleEspectrograma3d.css" />
     <title>Espectrograma</title>
   </head>
   <body>
     <header>
       <div>
-        <i class="fas fa-microphone-slash menu-icon" id="actMicro"></i>
-        <i class="fas fa-microphone menu-icon" id="mutedMicro"></i>
+        <i class="fas fa-microphone-slash menu-icon" id="actMicro" title="Activar micrófono"></i>
+        <i class="fas fa-microphone menu-icon" id="mutedMicro" title="Desactivar micrófono"></i>
+        <label for="audioFileInput" title="Cargar audio">
+          <i class="fas fa-file-upload menu-icon"></i>
+        </label>
+        <input
+          type="file"
+          id="audioFileInput"
+          accept="audio/*"
+          style="display: none"
+        />
       </div>
       <div class="titulo">
         <a href="espectrograma3d.html">Espectrograma 3D</a>
@@ -28,25 +41,25 @@
     </main>
 
     <script type="x-shader/x-vertex" id="vertexshader">
-             attribute float displacement;
-             uniform vec3 vLut[256];
-             varying vec3 vColor;
-      void main(){
-      		int index = int(displacement);
-      		vColor = vLut[index];
-                 vec3 newPosition = position + normal*displacement/25.5;
-                 gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition,1.0);
+      // Vertex Shader
+      uniform vec3 vLut[256];
+      attribute float displacement;
+      varying vec3 vColor;
+      void main() {
+          vColor = vLut[int(displacement)];
+          vec3 newPosition = position + normal * displacement * 0.1;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
       }
     </script>
 
     <script type="x-shader/x-fragment" id="fragmentshader">
+      // Fragment Shader
       varying vec3 vColor;
-      void main(){
-        gl_FragColor = vec4(vColor,1.0);
+      void main() {
+          gl_FragColor = vec4(vColor, 1.0);
       }
     </script>
 
     <script type="module" src="../js/script3d.js"></script>
-
   </body>
 </html>
