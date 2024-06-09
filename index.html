@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/stylePgPrincipal.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/stylePgPrincipal.css" />
+    <link rel="shortcut icon" href="data/icon.png" type="image/x-icon" />
     <title>Espectrograma</title>
   </head>
   <body>
@@ -15,6 +20,114 @@
       <div class="botones">
         <a href="components/espectrograma3d.html">Espectrograma 3D</a>
       </div>
+
+      <div class="contenido">
+        <p>Vanessa Barrero</p>
+        <p>Juan Hernández</p>
+      </div>
+
+      <div class="btnAyuda">
+        <div class="btnIcon" onclick="openModal()">
+          <span>
+            <i class="fas fas-solid fa-info-circle"></i>
+          </span>
+        </div>
+      </div>
     </main>
+
+    <div id="modalAyuda" class="modal">
+      <div class="modalContent">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="contendoAyuda">
+          <div class="principal">
+            <h1>Manual de Usuario</h1>
+            <p>
+              El espectrograma muestra el espectro de frecuencias de una señal
+              de audio a lo largo del tiempo. En esta aplicación, puedes
+              visualizar el espectro a través de un micrófono o de un archivo de
+              audio.
+            </p>
+          </div>
+          <div class="interfazUsu">
+            <h2>Interfaz de usuario</h2>
+            <p>La interfaz de usuario consta de los siguientes elementos:</p>
+            <ul>
+              <li>
+                Botón "Activar Micrófono": Haz clic en este botón para iniciar
+                la visualización del espectro de frecuencias desde tu micrófono.
+              </li>
+              <li>
+                Botón "Cargar Archivo de Audio": Haz clic en este botón para
+                seleccionar un archivo de audio desde tu computadora y
+                visualizar su espectro de frecuencias.
+              </li>
+            </ul>
+          </div>
+          <div class="usosDeMedios">
+            <h2>Uso del Micrófono</h2>
+            <p>
+              Al hacer clic en el botón "Activar Micrófono", se te solicitará
+              permiso para acceder a tu micrófono. Una vez que lo hayas
+              otorgado, el espectrograma comenzará a actualizar en tiempo real,
+              mostrando el espectro de frecuencias de tu voz o cualquier otro
+              sonido captado por el micrófono.
+            </p>
+            <h2>Uso de Archivos de Audio</h2>
+            <p>
+              Al hacer clic en el botón "Cargar Archivo de Audio", se abrirá un
+              cuadro de diálogo para que selecciones un archivo de audio desde
+              tu computadora. Una vez que hayas seleccionado un archivo, el
+              espectrograma se actualizará para mostrar el espectro de
+              frecuencias de ese archivo de audio.
+            </p>
+          </div>
+          <div class="visualizacion">
+            <h2>Visualización del Espectrograma</h2>
+            <p>
+              El espectrograma se representa como una superficie tridimensional
+              que se extiende horizontalmente a lo largo del tiempo y
+              verticalmente a lo largo de las frecuencias.
+            </p>
+            <ul>
+              <li>
+                Eje Horizontal (Tiempo): Representa la duración de la señal de
+                audio. A medida que avanza el tiempo, el espectrograma se
+                desplaza hacia la izquierda.
+              </li>
+              <li>
+                Eje Vertical (Frecuencia): Representa las diferentes frecuencias
+                de la señal de audio. Las frecuencias más bajas se encuentran en
+                la parte inferior, mientras que las frecuencias más altas se
+                encuentran en la parte superior.
+              </li>
+              <li>
+                Colores: Los colores utilizados en el espectrograma varían según
+                la intensidad de la señal de audio. Los colores más cálidos
+                (rojos, naranjas) representan mayor intensidad, mientras que los
+                colores más fríos (azules, verdes) representan menor intensidad.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openModal() {
+        document.getElementById("modalAyuda").style.display = "block";
+      }
+
+      function closeModal() {
+        document.getElementById("modalAyuda").style.display = "none";
+      }
+
+      // Cierra el modal si el usuario hace clic fuera del contenido del modal
+      window.onclick = function (event) {
+        var modal = document.getElementById("modalAyuda");
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+    </script>
   </body>
 </html>

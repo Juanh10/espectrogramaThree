@@ -8,23 +8,32 @@ let camara, escena, alturas, renderizador;
 let ACTX;
 let malla, geometria;
 let frecuenciaEtiquetas = [];
-let yTamano2, xTamano2;
+let yTamano2, xTamano2
 
-const frecuenciaMuestra = 512;
+const frecuenciaMuestra = 2048;
 const tiempoMuestra = 1200;
 const n_vertices = (frecuenciaMuestra + 1) * (tiempoMuestra + 1);
 
 function inicializarEscena() {
+    // Capturar una nueva camara perspectiva 
     camara = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 1000);
-    camara.position.z = 70;
+    // Establecer la posicion de la camara en el eje z
+    camara.position.z = 72;
+
+    camara.position.y = -2;
 
     escena = new THREE.Scene();
     alturas = new Uint8Array(n_vertices);
 
+
+    // Crear un nuvo renderizador 
     renderizador = new THREE.WebGLRenderer({ antialias: true });
     renderizador.setPixelRatio(window.devicePixelRatio);
     renderizador.setSize(window.innerWidth, window.innerHeight);
+
+    // Obetener el ID del contenedor del HTML 
     let contenedor = document.getElementById("Spectrogram");
+    // Agregar el contenedor en el renderizador para su visualizacion 
     contenedor.appendChild(renderizador.domElement);
 
     return alturas;
@@ -37,7 +46,8 @@ function actualizarAlturas(nuevasAlturas) {
 
 alturas = inicializarEscena();
 
-function iniciarMicrófono() {
+function iniciarMicrofono() {
+
     if (fuente) {
         fuente.disconnect();
         fuente = null;
@@ -114,9 +124,9 @@ function initVisualizacion(ANALIZADOR, DATOS) {
 
         const indices = [];
         const vertices = [];
-        const xTamano = 60;
+        const xTamano = 55;
         xTamano2 = xTamano;
-        const yTamano = 23;
+        const yTamano = 27;
         yTamano2 = yTamano;
         const xSegmentos = tiempoMuestra;
         const ySegmentos = frecuenciaMuestra;
@@ -465,7 +475,7 @@ function initVisualizacion(ANALIZADOR, DATOS) {
         alturas.set(DATOS, valorFinal - valorInicio);
         malla.geometry.attributes.displacement.array.set(alturas);
         malla.geometry.attributes.displacement.needsUpdate = true;
-        
+
     }
 
     init();
@@ -501,7 +511,7 @@ mutedMicro.addEventListener("click", () => {
 actMicrofono.addEventListener("click", function () {
     actMicrofono.style.display = "none";
     mutedMicro.style.display = "inline-block";
-    iniciarMicrófono();
+    iniciarMicrofono();
 });
 
 audioFileInput.addEventListener("change", function (event) {

@@ -7,18 +7,23 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="shortcut icon" href="../data/icon.png" type="image/x-icon">
     <link rel="stylesheet" href="../css/styleEspectrograma3d.css" />
     <title>Espectrograma</title>
   </head>
   <body>
     <header>
       <div>
-        <i class="fas fa-microphone-slash menu-icon" id="actMicro" title="Activar micrófono"></i>
-        <i class="fas fa-microphone menu-icon" id="mutedMicro" title="Desactivar micrófono"></i>
+        <i
+          class="fas fa-microphone-slash menu-icon"
+          id="actMicro"
+          title="Activar micrófono"
+        ></i>
+        <i
+          class="fas fa-microphone menu-icon"
+          id="mutedMicro"
+          title="Desactivar micrófono"
+        ></i>
         <label for="audioFileInput" title="Cargar audio">
           <i class="fas fa-file-upload menu-icon"></i>
         </label>
@@ -26,17 +31,24 @@
           type="file"
           id="audioFileInput"
           accept="audio/*"
+          max="10485760"
           style="display: none"
         />
       </div>
       <div class="titulo">
         <a href="espectrograma3d.html">Espectrograma 3D</a>
       </div>
-      <a href="../index.html" class="home-icon">
+      <a href="../index.html" class="home-icon" title="Inicio">
         <i class="fas fa-home"></i>
       </a>
     </header>
     <main>
+      <div class="rangoColor">
+        <p>Escala de colores</p>
+        <div class="imgRangoColor">
+          <img src="../data/escalaColores.png" alt="">
+        </div>
+      </div>
       <div id="Spectrogram"></div>
     </main>
 
@@ -59,7 +71,7 @@
           gl_FragColor = vec4(vColor, 1.0);
       }
     </script>
-
+    
     <script type="module" src="../js/script3d.js"></script>
   </body>
 </html>
