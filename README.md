@@ -6,6 +6,8 @@
 
 Una visualización interactiva de espectrograma en 3D utilizando la potente librería Three.js para procesamiento y representación de audio en tiempo real.
 
+![Espectro](img/espectro.png)  
+
 ## 🚀 Características
 
 - **Visualización 3D**: Representación espectral en tres dimensiones
